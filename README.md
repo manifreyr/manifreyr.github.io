@@ -1,2 +1,0 @@
-# TOL203M
-Tölvugrafík
