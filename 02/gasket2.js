@@ -14,12 +14,6 @@ window.onload = function init()
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
-    //
-    //  Initialize our data for the Sierpinski Gasket
-    //
-
-    // First, initialize the corners of our gasket with three points.
-
     var vertices = [
         vec2( -1, -1 ),
         vec2( -1,  1 ),
@@ -31,24 +25,18 @@ window.onload = function init()
     divideSquare( vertices[0], vertices[1], vertices[2], vertices[3],
                     NumTimesToSubdivide);
 
-    //
-    //  Configure WebGL
-    //
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 1.0, 1.0, 1.0, 1.0 );
 
-    //  Load shaders and initialize attribute buffers
 
     var program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
 
-    // Load the data into the GPU
 
     var bufferId = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW );
 
-    // Associate out shader variables with our data buffer
 
     var vPosition = gl.getAttribLocation( program, "vPosition" );
     gl.vertexAttribPointer( vPosition, 2, gl.FLOAT, false, 0, 0 );
@@ -67,12 +55,10 @@ function square(a, b, c , d){
 }
 
 function divideSquare(a, b, c, d, count) {
-    // Check for end of recursion
+
     if (count === 0) {
-        // Base case: draw the square
         square(a, b, c, d);
     } else {
-        // Bisect the sides to find the midpoints
         var ab = mix(a, b, 1/3);
         var ab2 = mix(a, b, 2/3);
         var bc = mix(b, c, 1/3);
@@ -88,16 +74,15 @@ function divideSquare(a, b, c, d, count) {
 
         --count;
 
-        // Recursively divide the 8 surrounding squares (excluding the center square)
-        divideSquare(a, ab, center1, da2, count);       // Bottom left
-        divideSquare(ab, ab2, center2, center1, count);  // left middle
-        divideSquare(ab2, b, bc, center2, count);      // Top-left
-        divideSquare(center2, bc, bc2, center3, count);  // top middle
-        // Center square is omitted to create the "hole"
-        divideSquare(center3, bc2, c, cd, count);  // top right
-        divideSquare(center4, center3, cd, cd2, count);  // right middle
-        divideSquare(da, center4, cd2, d, count);  // bottom right
-        divideSquare(da2, center1, center4, da, count);  // Bottom-middle square
+        
+        divideSquare(a, ab, center1, da2, count);       
+        divideSquare(ab, ab2, center2, center1, count); 
+        divideSquare(ab2, b, bc, center2, count);      
+        divideSquare(center2, bc, bc2, center3, count);  
+        divideSquare(center3, bc2, c, cd, count);  
+        divideSquare(center4, center3, cd, cd2, count); 
+        divideSquare(da, center4, cd2, d, count);  
+        divideSquare(da2, center1, center4, da, count); 
     }
 }
 
