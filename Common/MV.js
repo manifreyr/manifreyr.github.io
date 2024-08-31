@@ -626,6 +626,8 @@ function mix( u, v, s )
     }
 
     if ( u.length != v.length ) {
+        console.log(u);
+        console.log(v);    
         throw "vector dimension mismatch";
     }
 
