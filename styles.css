@@ -1,0 +1,39 @@
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: aquamarine;
+    margin: 0;
+    padding: 20px;
+}
+
+.week-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.week {
+    display: flex;
+    justify-content: space-between;
+}
+
+.week-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.problem {
+    background-color: #3498db;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    margin: 8px;
+    width: 18%;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.problem:hover {
+    background-color: #2980b9;
+}
