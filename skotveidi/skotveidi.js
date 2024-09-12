@@ -124,7 +124,7 @@ function drawAll() {
 
     for (var i = 0; i < score; i++) {
         for (var j = 0; j < point.length; j++) {
-            vertices.push(vec2(-0.95 + point[j][0] + (i % 5) * 0.04, 0.95 + point[j][1] - Math.floor(i / 5) * 0.12));
+            vertices.push(vec2(-0.95 + point[j][0] + (i % 5) * 0.04, 0.95 + point[j][1]));
         }
     }
 
