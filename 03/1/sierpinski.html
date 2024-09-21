@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>Sierpinski</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        #gl-canvas {
+            border: 3px solid #333;
+            background-color: white;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container p {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+    </style>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+uniform float scaleFactor;
+uniform vec2 transition;
+void
+main()
+{
+    vec4 tempPosition = vPosition + vec4(transition.x / scaleFactor, transition.y / scaleFactor, 0.0, 0.0);
+	gl_PointSize = 1.0;
+    gl_Position = vec4(tempPosition.x * scaleFactor, tempPosition.y * scaleFactor, tempPosition.zw);
+}
+</script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+uniform vec4 color;
+
+void
+main()
+{
+    gl_FragColor = color;
+}
+</script>
+
+    <script type="text/javascript" src="/Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="/Common/initShaders.js"></script>
+    <script type="text/javascript" src="/Common/MV.js"></script>
+    <script type="text/javascript" src="sierpinski.js"></script>
+</head>
+
+<body>
+    <div>
+        <canvas id="gl-canvas" width="500" height="500">
+            Oops ... your browser doesn't support the HTML5 canvas element
+        </canvas>
+    </div>
+</body>
+
+</html>

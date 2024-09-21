@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>Hringur</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        #gl-canvas {
+            border: 3px solid #333;
+            background-color: white;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container p {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+    </style>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+
+void main()
+{
+    gl_Position = vPosition;
+}
+</script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+uniform float time;
+uniform vec2 resolution;
+
+void main()
+{
+    vec4 color;
+    
+    // Fá stöðluð hnit bútar (gl_FragCoord er í skjáhnitum)
+    vec2 st = gl_FragCoord.xy / resolution.xy;
+    
+    // Breytum þeim í -1 til 1
+    st = 2.0*st - 1.0;
+
+    st.x -= mod(time * 0.001, 2.0) - 1.0;
+    st.y += 0.5 * sin(5.0 * time* 0.001);
+    
+    if (length(st) < 0.1)
+        color = vec4(0.10, 0.0, 0.80, 1.0);   
+    else
+        color = vec4(0.43, 0.77, 0.97, 1.0);   
+    
+    gl_FragColor = color;
+}
+            </script>
+
+    <script type="text/javascript" src="/Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="/Common/initShaders.js"></script>
+    <script type="text/javascript" src="/Common/MV.js"></script>
+    <script type="text/javascript" src="drawCircle.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <canvas id="gl-canvas" width="500" height="500"></canvas>
+    </div>
+
+</body>
+
+</html>
