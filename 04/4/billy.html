@@ -1,0 +1,77 @@
+<html>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute  vec4 vPosition;
+attribute  vec4 vColor;
+varying vec4 fColor;
+
+uniform mat4 transform;
+
+void main() 
+{
+    fColor = vColor;
+    gl_Position = transform * vPosition;
+} 
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+   
+varying vec4 fColor;
+
+void main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+        font-family: Arial, sans-serif;
+    }
+
+    #gl-canvas {
+        border: 3px solid #333;
+        background-color: white;
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 24px;
+        color: #333;
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .container p {
+        font-size: 18px;
+        margin-top: 10px;
+    }
+</style>
+
+<script type="text/javascript" src="/Common/webgl-utils.js"></script>
+<script type="text/javascript" src="/Common/initShaders.js"></script>
+<script type="text/javascript" src="/Common/MV.js"></script>
+<script type="text/javascript" src="billy.js"></script>
+
+<body>
+    <canvas id="gl-canvas" width="512"" height=" 512">
+
+        <br />
+
+</body>
+
+</html>
