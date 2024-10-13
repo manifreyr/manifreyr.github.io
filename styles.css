@@ -1,4 +1,3 @@
-
 body {
     font-family: Arial, sans-serif;
     background-color: aquamarine;
@@ -14,7 +13,7 @@ body {
 
 .week {
     display: flex;
-    justify-content: space-between;
+
 }
 
 .week-title {
