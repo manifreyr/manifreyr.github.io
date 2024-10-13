@@ -1,0 +1,82 @@
+<html>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #000000;
+        /* Black background */
+        font-family: Arial, sans-serif;
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #gl-canvas {
+        border: 3px solid #333;
+        background-color: #D3D3D3;
+        /* Light grey canvas */
+    }
+
+    .label {
+        background-color: #ADD8E6;
+        /* Light blue background */
+        color: #333;
+        font-size: 24px;
+        font-weight: bold;
+        padding: 10px 20px;
+        border-radius: 15px;
+        /* Rounded corners */
+        margin-bottom: 20px;
+        text-align: center;
+    }
+</style>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute  vec4 vPosition;
+attribute  vec4 vColor;
+varying vec4 fColor;
+
+uniform mat4 transform;
+
+void main() 
+{
+    fColor = vColor;
+    gl_Position = transform * vPosition;
+} 
+</script>
+
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+   
+varying vec4 fColor;
+
+void main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="gof.js"></script>
+
+<body>
+    <div class="container">
+        <div class="label">Game of Life</div> <!-- Light blue label -->
+        <canvas id="gl-canvas" width="512" height="512"></canvas> <!-- Light grey canvas -->
+    </div>
+</body>
+
+</html>
