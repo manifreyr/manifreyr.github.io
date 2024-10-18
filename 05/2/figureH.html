@@ -1,32 +1,36 @@
-<!DOCTYPE html>
 <html>
 
 <head>
     <script id="vertex-shader" type="x-shader/x-vertex">
         attribute vec4 vPosition;
+        attribute vec4 vColor;
+        varying vec4 fColor;
 
-        uniform mat4 projection;
-        uniform mat4 modelview;
+        uniform mat4 modelViewMatrix;
+        uniform mat4 projectionMatrix;
 
-        void main() {
-            gl_Position = projection * modelview * vPosition;
+        void main()
+        {
+            fColor = vColor;
+            gl_Position = projectionMatrix * modelViewMatrix * vPosition;
         }
-    </script>
+        </script>
 
     <script id="fragment-shader" type="x-shader/x-fragment">
         precision mediump float;
 
-        uniform vec4 fColor;
+        varying vec4 fColor;
 
-        void main() {
+        void main()
+        {
             gl_FragColor = fColor;
         }
-    </script>
+        </script>
 
     <script type="text/javascript" src="/Common/webgl-utils.js"></script>
     <script type="text/javascript" src="/Common/initShaders.js"></script>
     <script type="text/javascript" src="/Common/MV.js"></script>
-    <script type="text/javascript" src="views.js"></script>
+    <script type="text/javascript" src="figureH.js"></script>
 
     <style>
         body {
@@ -38,7 +42,6 @@
             height: 100vh;
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
-            flex-direction: column;
         }
 
         .container {
@@ -53,9 +56,12 @@
             background-color: white;
         }
 
-        #Viewpoint,
-        #Speed,
-        #Height {
+        p {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        #Speed {
             font-size: 18px;
             margin-top: 10px;
             text-align: center;
@@ -65,13 +71,9 @@
 
 <body>
     <div class="container">
-        <p id="instructions">Notaðu örvatakka til að breyta um hæð og hraða og smellu á 1, 2, 3, ..., 9 til að skipta um
-            sjónarhorn.</p>
-
-        <canvas id="gl-canvas" width="480" height="400"></canvas>
-        <div id="Viewpoint">1: Fjarlægt sjónarhorn</div>
-        <div id="Height">Viðbótarhæð: 0.0</div>
-        <div id="Speed">Hraði: 3.0</div>
+        <p id="text">Notaðu örvatakka (upp og niður) til að breyta hraða hlauparans!</p>
+        <div id="Speed">Hraði hlauparans: 1.5</div>
+        <canvas id="gl-canvas" width="400" height="450"></canvas>
     </div>
 </body>
 
