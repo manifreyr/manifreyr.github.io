@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 vPosition;
+
+        uniform mat4 projection;
+        uniform mat4 modelview;
+
+        void main() {
+            gl_Position = projection * modelview * vPosition;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+
+        uniform vec4 fColor;
+
+        void main() {
+            gl_FragColor = fColor;
+        }
+    </script>
+
+    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../Common/initShaders.js"></script>
+    <script type="text/javascript" src="../Common/MV.js"></script>
+    <script type="text/javascript" src="views.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            flex-direction: column;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #gl-canvas {
+            border: 3px solid #333;
+            background-color: white;
+        }
+
+        #Viewpoint,
+        #Speed,
+        #Height {
+            font-size: 18px;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <p id="instructions">Notaðu örvatakka til að breyta um hæð og hraða og smellu á 1, 2, 3, ..., 9 til að skipta um
+            sjónarhorn.</p>
+
+        <canvas id="gl-canvas" width="480" height="400"></canvas>
+        <div id="Viewpoint">1: Fjarlægt sjónarhorn</div>
+        <div id="Height">Viðbótarhæð: 0.0</div>
+        <div id="Speed">Hraði: 3.0</div>
+    </div>
+</body>
+
+</html>
