@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute vec4 vPosition;
+attribute vec4 vNormal;
+varying vec3 N, L, E;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec4 lightPosition;
+uniform mat3 normalMatrix;
+
+void main()
+{
+    vec3 pos = (modelViewMatrix * vPosition).xyz;
+
+    // check for directional light
+    if(lightPosition.w == 0.0) L = normalize(lightPosition.xyz);
+    else L = normalize( lightPosition.xyz - pos );
+
+    E =  -normalize(pos);
+    N = normalize( normalMatrix*vNormal.xyz);
+
+    gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+uniform vec4 ambientProduct;
+uniform vec4 diffuseProduct;
+uniform vec4 specularProduct;
+uniform float shininess;
+uniform float discardValue;
+varying vec3 N, L, E;
+
+void main()
+{
+    vec4 fColor;
+
+    vec3 H = normalize( L + E );
+
+    vec4 ambient = ambientProduct;
+    vec4 diffuse = max( dot(L, N), 0.0 )*diffuseProduct;
+    vec4 specular = specularProduct * pow( max(dot(N, H), 0.0), shininess );
+
+    if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
+
+
+//  Throw away if too bright:
+    vec4 color = ambient + diffuse + specular;
+    color.a = 1.0;
+    
+
+    if( length(color.xyz) > discardValue)
+        discard;
+    else
+        gl_FragColor = color;
+
+}
+</script>
+
+<script type="text/javascript" src="/Common/webgl-utils.js"></script>
+<script type="text/javascript" src="/Common/initShaders.js"></script>
+<script type="text/javascript" src="/Common/MV.js"></script>
+<script type="text/javascript" src="tepotturData.js"></script>
+<script type="text/javascript" src="tepottur.js"></script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+        font-family: Arial, sans-serif;
+    }
+
+    #gl-canvas {
+        border: 3px solid #333;
+        background-color: white;
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 24px;
+        color: #333;
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .container p {
+        font-size: 18px;
+        margin-top: 10px;
+    }
+
+    #hValue,
+    #discardValue {
+        font-size: 18px;
+        margin-top: 10px;
+        text-align: center;
+        flex-direction: column;
+    }
+</style>
+
+<body>
+    <div class="container">
+
+        <canvas id="gl-canvas" width="512" height="512"></canvas>
+        <div id="hValue">Gildið á h er: 360</div>
+        <div id="discardValue">Gildið á discardValue er: 1.8</div>
+    </div>
+</body>
+
+</html>
