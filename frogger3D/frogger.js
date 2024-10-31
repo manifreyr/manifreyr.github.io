@@ -20,7 +20,7 @@ var fovy = 60.0;
 var near = 0.1;
 var far = 100.0;
 
-var spinX = 52.0;
+var spinX = -70.0;
 var spinY = 0.0;
 var origX;
 var origY;
@@ -35,15 +35,21 @@ var at = vec3(0.0, 0.0, 0.0);
 var up = vec3(0.0, 1.0, 0.0);
 
 // Game variables
-var gridRows = 13;
+var gridRows = 14; // Increased from 13 to 14
 var gridCols = 14;
 var cellSize = 2.0;
 
-var frogPos = { x: Math.floor(gridCols / 2), y: 12 };
+var frogPos = { x: Math.floor(gridCols / 2), y: 13 }; // Starting at new bottom row 13
 var frogAlive = true;
+var isFrogFlipped = false;
 
 var cars = [];
 var logs = [];
+var fly = {
+    x: null,
+    y: null,
+    active: false
+}
 
 window.onload = function init() {
     canvas = document.getElementById("gl-canvas");
@@ -79,31 +85,67 @@ window.onload = function init() {
     // Initialize game elements
     initGameElements();
 
-    // Event listeners for keyboard
     window.addEventListener("keydown", function (e) {
         if (!frogAlive) return;
         switch (e.keyCode) {
+            case 32: // Spacebar 
+                isFrogFlipped = !isFrogFlipped;
+                break;
+
             case 37: // Left arrow
-                if (frogPos.x < gridCols - 1) {
-                    frogPos.x++;
-                    frogPos.x = Math.round(frogPos.x);
+                if (!isFrogFlipped) {
+                    if (frogPos.x > 0) {
+                        frogPos.x--;
+                        frogPos.x = Math.round(frogPos.x);
+                    }
+                } else {
+                    if (frogPos.x < gridCols - 1) {
+                        frogPos.x++;
+                        frogPos.x = Math.round(frogPos.x);
+                    }
                 }
-                console.log(frogPos.x);
                 break;
+
             case 38: // Up arrow
-                if (frogPos.y > 0) frogPos.y--;
-                break;
-            case 39: // Right arrow
-                if (frogPos.x > 0) {
-                    frogPos.x--;
-                    frogPos.x = Math.round(frogPos.x);
+                if (!isFrogFlipped) {
+                    if (frogPos.y > 0) {
+                        frogPos.y--;
+                    }
+                } else {
+                    if (frogPos.y < gridRows - 1) {
+                        frogPos.y++;
+                    }
                 }
                 break;
+
+            case 39: // Right arrow
+                if (!isFrogFlipped) {
+                    if (frogPos.x < gridCols - 1) {
+                        frogPos.x++;
+                        frogPos.x = Math.round(frogPos.x);
+                    }
+                } else {
+                    if (frogPos.x > 0) {
+                        frogPos.x--;
+                        frogPos.x = Math.round(frogPos.x);
+                    }
+                }
+                break;
+
             case 40: // Down arrow
-                if (frogPos.y < gridRows - 1) frogPos.y++;
+                if (!isFrogFlipped) {
+                    if (frogPos.y < gridRows - 1) {
+                        frogPos.y++;
+                    }
+                } else {
+                    if (frogPos.y > 0) {
+                        frogPos.y--;
+                    }
+                }
                 break;
         }
     });
+
 
     // Event listeners for mouse
     canvas.addEventListener("mousedown", function (e) {
@@ -125,48 +167,88 @@ window.onload = function init() {
             origY = e.clientY;
         }
     });
+    setInterval(spawnFly, 10000);
 
     render();
 }
 
+// initialize cars and logs/turtles
 function initGameElements() {
-    // Initialize cars
-    for (var row = 6; row <= 11; row++) {
-        var direction = (row % 2 == 0) ? 1 : -1; // Alternate direction
-        var numCars = 3; // Number of cars in this row
+
+    for (var row = 7; row <= 12; row++) {
+        var direction = (row % 2 == 0) ? 1 : -1;
+        var numCars = 2;
+        var rowSpeed = 0.02 + Math.random() * 0.02;
+        var segmentLength = gridCols / numCars;
+
         for (var i = 0; i < numCars; i++) {
+            var length = 2.0;
+
+            var minX = i * segmentLength;
+            var maxX = (i + 1) * segmentLength - length;
+
+            if (maxX < minX) {
+                maxX = minX;
+            }
+
+            var x = minX + Math.random() * (maxX - minX);
+
             var car = {
-                x: Math.random() * gridCols,
+                x: x,
                 y: row,
-                speed: 0.02 + Math.random() * 0.02,
+                speed: rowSpeed,
                 direction: direction,
-                length: 2.0 // Fixed length for simplicity
+                length: length
             };
             cars.push(car);
         }
     }
 
-    // Initialize logs
-    for (var row = 0; row <= 4; row++) {
-        var direction = (row % 2 == 0) ? 1 : -1; // Alternate direction
-        var numLogs = 3; // Number of logs in this row
-        for (var i = 0; i < numLogs; i++) {
-            var log = {
-                x: Math.random() * gridCols,
+
+    for (var row = 1; row <= 5; row++) {
+        var direction = (row % 2 == 0) ? 1 : -1;
+        var numObjects = 3;
+        var rowSpeed = 0.01 + Math.random() * 0.02;
+        var segmentLength = gridCols / numObjects;
+
+        for (var i = 0; i < numObjects; i++) {
+            var isTurtle = Math.random() < 0.30;
+            var length = 2.0;
+            var minX = i * segmentLength;
+            var maxX = (i + 1) * segmentLength - length;
+
+            if (maxX < minX) {
+                maxX = minX;
+            }
+
+            var x = minX + Math.random() * (maxX - minX);
+
+            var obj = {
+                x: x,
                 y: row,
-                speed: 0.01 + Math.random() * 0.02,
+                speed: rowSpeed,
                 direction: direction,
-                length: 3.0 // Fixed length for simplicity
+                length: length,
+                isRidable: true,
+                type: isTurtle ? 'turtle' : 'log',
+                submergeTimer: isTurtle ? getRandomInt(120, 300) : null,
+                submergeDuration: isTurtle ? getRandomInt(60, 90) : null,
+                surfaceDuration: isTurtle ? getRandomInt(240, 540) : null
             };
-            logs.push(log);
+            logs.push(obj);
         }
     }
 }
 
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+//reset game if frog has died
 function resetGame() {
-    alert("Game Over!");
-    frogPos = { x: Math.floor(gridCols / 2), y: 12 };
+    frogPos = { x: Math.floor(gridCols / 2), y: 13 };
     frogAlive = true;
+    isFrogFlipped = false;
 }
 
 function colorCube() {
@@ -202,21 +284,26 @@ function gridToWorld(x, y) {
     var worldY = (gridRows / 2 - y + 0.5) * cellSize;
     return vec3(worldX, worldY, 0.0);
 }
+function frogGridToWorld(x, y) {
+    var worldX = (x - gridCols / 2 + 0.5) * cellSize;
+    var worldZ = (gridRows / 2 - y + 0.5) * cellSize;
+    return vec3(worldX, 0.0, -worldZ);
+}
 
-function render() {
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+function spawnFly() {
+    if (fly.active) return;
+    var possibleRows = [0, 6];
+    fly.y = possibleRows[Math.floor(Math.random() * possibleRows.length)];
+    fly.x = Math.floor(Math.random() * gridCols);
+    fly.active = true;
 
-    var frogWorldPos = gridToWorld(frogPos.x, frogPos.y);
+    setTimeout(function () {
+        fly.active = false;
+    }, 7500);
+}
 
-    var eye = vec3(frogWorldPos[0], frogWorldPos[1] + 3.0, frogWorldPos[2] - 30.0);
-    var at = vec3(0.0, 0.0, 0.0);
-    var up = vec3(0.0, 1.0, 0.0);
-
-    mv = lookAt(eye, at, up);
-    mv = mult(mv, rotateX(spinX));
-    mv = mult(mv, rotateY(spinY));
-
-    // Update cars
+//update cars and logs/turtles
+function updateObjects() {
     for (var i = 0; i < cars.length; i++) {
         var car = cars[i];
         car.x += car.speed * car.direction;
@@ -224,46 +311,64 @@ function render() {
         if (car.x < -car.length) car.x = gridCols + car.length;
     }
 
-    // Update logs
     for (var i = 0; i < logs.length; i++) {
         var log = logs[i];
         log.x += log.speed * log.direction;
         if (log.x > gridCols + log.length) log.x = -log.length;
         if (log.x < -log.length) log.x = gridCols + log.length;
-    }
 
-    // Collision detection
-    if (frogAlive) {
-        if (frogPos.y == 5 || frogPos.y == 12) {
-            frogPos.x = Math.round(frogPos.x);
+        if (log.type === 'turtle') {
+            log.submergeTimer--;
+            if (log.submergeTimer <= 0) {
+                log.isRidable = !log.isRidable;
+                if (log.isRidable) {
+                    log.submergeTimer = log.surfaceDuration;
+                } else {
+                    log.submergeTimer = log.submergeDuration;
+                }
+            }
         }
-        else if (frogPos.y >= 6 && frogPos.y <= 11) {
-            // Road rows
+    }
+}
+
+// detect collisions with the frog and cars/river
+function detectCollisions() {
+    if (frogAlive) {
+        if (frogPos.y == 0 || frogPos.y == 6 || frogPos.y == 13) {
+            frogPos.x = Math.round(frogPos.x);
+            if (fly.active && frogPos.x === fly.x && frogPos.y === fly.y) {
+                fly.active = false;
+            }
+        } else if (frogPos.y >= 7 && frogPos.y <= 12) {
             for (var i = 0; i < cars.length; i++) {
                 var car = cars[i];
                 if (car.y == frogPos.y) {
-                    if (frogPos.x >= car.x && frogPos.x <= car.x + car.length) {
-                        frogPos.x = Math.round(frogPos.x)
+                    if (frogPos.x >= car.x - 1.0 && frogPos.x <= car.x + car.length) {
                         frogAlive = false;
                         resetGame();
                         break;
                     }
                 }
             }
-        } else if (frogPos.y >= 0 && frogPos.y <= 4) {
-            // River rows
+        } else if (frogPos.y >= 1 && frogPos.y <= 5) {
             var onLog = false;
             for (var i = 0; i < logs.length; i++) {
                 var log = logs[i];
                 if (log.y == frogPos.y) {
                     if (frogPos.x >= log.x && frogPos.x <= log.x + log.length) {
-                        onLog = true;
-                        frogPos.x = frogPos.x + log.speed * log.direction;
-                        if (frogPos.x < 0 || frogPos.x > gridCols - 1) {
+                        if (log.type === 'turtle' && !log.isRidable) {
                             frogAlive = false;
                             resetGame();
+                            break;
+                        } else {
+                            onLog = true;
+                            frogPos.x += log.speed * log.direction;
+                            if (frogPos.x < 0 || frogPos.x > gridCols - 1) {
+                                frogAlive = false;
+                                resetGame();
+                            }
+                            break;
                         }
-                        break;
                     }
                 }
             }
@@ -273,13 +378,15 @@ function render() {
             }
         }
     }
+}
 
-    // Draw river (blue rectangles)
-    gl.uniform4fv(uColorLoc, flatten(vec4(0.0, 0.0, 1.0, 1.0))); // Blue
-    for (var y = 0; y <= 4; y++) {
+// draw the river in blue
+function drawRiver() {
+    gl.uniform4fv(uColorLoc, flatten(vec4(0.0, 0.0, 1.0, 1.0)));
+    for (var y = 1; y <= 5; y++) {
         var mv1 = mv;
         var pos = gridToWorld(gridCols / 2 - 0.5, y);
-        pos[2] += 2.0;
+        pos[2] -= 2.0;
         mv1 = mult(mv1, translate(pos));
         mv1 = mult(mv1, scalem(gridCols * cellSize, cellSize, cellSize));
         gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(mv1));
@@ -287,13 +394,15 @@ function render() {
 
         gl.drawArrays(gl.TRIANGLES, 0, numVertices);
     }
+}
 
-    // Draw free zones (grey rectangles)
-    gl.uniform4fv(uColorLoc, flatten(vec4(0.5, 0.5, 0.5, 1.0))); // Grey
-    [5, 12].forEach(function (y) {
+// draw the free zones in grey
+function drawFreeZones() {
+    gl.uniform4fv(uColorLoc, flatten(vec4(0.5, 0.5, 0.5, 1.0)));
+    [0, 6, 13].forEach(function (y) {
         var mv1 = mv;
         var pos = gridToWorld(gridCols / 2 - 0.5, y);
-        pos[2] += 2.0;
+        pos[2] -= 2.0;
         mv1 = mult(mv1, translate(pos));
         mv1 = mult(mv1, scalem(gridCols * cellSize, cellSize, cellSize));
         gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(mv1));
@@ -301,13 +410,15 @@ function render() {
 
         gl.drawArrays(gl.TRIANGLES, 0, numVertices);
     });
+}
 
-    // Draw road (brown rectangles)
-    gl.uniform4fv(uColorLoc, flatten(vec4(0.6, 0.4, 0.2, 1.0))); // Brown
-    for (var y = 6; y <= 11; y++) {
+//draw the road in light brown
+function drawRoad() {
+    gl.uniform4fv(uColorLoc, flatten(vec4(0.6, 0.4, 0.2, 1.0)));
+    for (var y = 7; y <= 12; y++) {
         var mv1 = mv;
         var pos = gridToWorld(gridCols / 2 - 0.5, y);
-        pos[2] += 2.0;
+        pos[2] -= 2.0;
         mv1 = mult(mv1, translate(pos));
         mv1 = mult(mv1, scalem(gridCols * cellSize, cellSize, cellSize));
         gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(mv1));
@@ -315,23 +426,30 @@ function render() {
 
         gl.drawArrays(gl.TRIANGLES, 0, numVertices);
     }
-
-    // Draw logs with clipping
-    gl.uniform4fv(uColorLoc, flatten(vec4(0.4, 0.2, 0.0, 1.0))); // Dark Brown
+}
+// draw the objects in the river should be about 70% logs and 30% turtles
+function drawLogs() {
     for (var i = 0; i < logs.length; i++) {
-        var log = logs[i];
+        var obj = logs[i];
+        if (obj.type === 'turtle' && !obj.isRidable) {
+            continue;
+        }
+        if (obj.type === 'log') {
+            gl.uniform4fv(uColorLoc, flatten(vec4(0.4, 0.2, 0.0, 1.0)));
+        } else if (obj.type === 'turtle') {
+            gl.uniform4fv(uColorLoc, flatten(vec4(0.13, 0.35, 0.13, 1.0)));
+        }
 
-        // Calculate visible portion within the grid
-        var leftEdge = log.x;
-        var rightEdge = log.x + log.length;
+        var leftEdge = obj.x;
+        var rightEdge = obj.x + obj.length;
         var visibleLeft = Math.max(leftEdge, 0);
         var visibleRight = Math.min(rightEdge, gridCols);
 
         if (visibleLeft < visibleRight) {
             var visibleLength = visibleRight - visibleLeft;
             var mv1 = mv;
-            var pos = gridToWorld(visibleLeft + visibleLength / 2 - 0.5, log.y);
-            pos[2] += 1.80;
+            var pos = gridToWorld(visibleLeft + visibleLength / 2 - 0.5, obj.y);
+            pos[2] -= 1.80;
             mv1 = mult(mv1, translate(pos));
             mv1 = mult(mv1, scalem(visibleLength * cellSize, cellSize, cellSize));
             gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(mv1));
@@ -340,13 +458,14 @@ function render() {
             gl.drawArrays(gl.TRIANGLES, 0, numVertices);
         }
     }
+}
 
-    // Draw cars with clipping
-    gl.uniform4fv(uColorLoc, flatten(vec4(1.0, 0.0, 0.0, 1.0))); // Red
+// draw the cars on the road in red with a smooth cutout 
+function drawCars() {
+    gl.uniform4fv(uColorLoc, flatten(vec4(1.0, 0.0, 0.0, 1.0)));
     for (var i = 0; i < cars.length; i++) {
         var car = cars[i];
 
-        // Calculate visible portion within the grid
         var leftEdge = car.x;
         var rightEdge = car.x + car.length;
         var visibleLeft = Math.max(leftEdge, 0);
@@ -365,8 +484,11 @@ function render() {
         }
     }
 
-    // Draw frog
-    gl.uniform4fv(uColorLoc, flatten(vec4(0.0, 1.0, 0.0, 1.0))); // Green
+}
+
+// draw the frog in green
+function drawFrog() {
+    gl.uniform4fv(uColorLoc, flatten(vec4(0.0, 1.0, 0.0, 1.0)));
     var mv1 = mv;
     var frogWorldPos = gridToWorld(frogPos.x, frogPos.y);
     mv1 = mult(mv1, translate(frogWorldPos));
@@ -375,6 +497,58 @@ function render() {
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
 
     gl.drawArrays(gl.TRIANGLES, 0, numVertices);
+}
+
+//draw the fly in pink
+function drawFly() {
+    gl.uniform4fv(uColorLoc, flatten(vec4(1.0, 0.0, 1.0, 1.0)));
+    var mvFly = mv;
+    var flyWorldPos = gridToWorld(fly.x, fly.y);
+    mvFly = mult(mvFly, translate(flyWorldPos));
+    mvFly = mult(mvFly, scalem(cellSize, cellSize, cellSize));
+    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(mvFly));
+    gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
+
+    gl.drawArrays(gl.TRIANGLES, 0, numVertices);
+}
+
+
+function render() {
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    var frogWorldPos = frogGridToWorld(frogPos.x, frogPos.y);
+
+    if (!isFrogFlipped) {
+        var cameraOffset = vec3(0.0, 5.0, 20.0);
+        var eye = add(frogWorldPos, cameraOffset);
+    }
+    else {
+        var cameraOffset = vec3(0.0, 20.0, -12.5);
+        var eye = add(frogWorldPos, cameraOffset);
+    }
+    var at = frogWorldPos;
+
+    var up = vec3(0.0, 1.0, 0.0);
+
+
+    mv = lookAt(eye, at, up);
+
+
+    mv = mult(mv, rotateX(spinX));
+    mv = mult(mv, rotateY(spinY));
+
+    updateObjects();
+    detectCollisions();
+    drawRiver();
+    drawFreeZones();
+    drawRoad();
+    drawLogs();
+    drawCars();
+    drawFrog();
+
+    if (fly.active) {
+        drawFly();
+    }
 
     window.requestAnimFrame(render);
 }
