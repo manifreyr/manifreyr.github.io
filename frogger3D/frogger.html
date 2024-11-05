@@ -40,6 +40,15 @@
             margin-bottom: 20px;
             text-align: center;
         }
+
+        .stats-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            /* Adjust the value as needed */
+        }
     </style>
 
     <!-- Vertex Shader -->
@@ -72,6 +81,7 @@
         
     </script>
 
+
     <script type="text/javascript" src="/Common/webgl-utils.js"></script>
     <script type="text/javascript" src="/Common/initShaders.js"></script>
     <script type="text/javascript" src="/Common/MV.js"></script>
@@ -80,7 +90,11 @@
 
 <body>
     <div class="container">
-        <div class="label">3D Frogger Game</div>
+        <div class="stats-container">
+            <div class="label">3D Frogger Game</div>
+            <div id="scoreDisplay" class="label">Score: 0</div>
+            <div id="livesDisplay" class="label">Lives: 5</div>
+        </div>
         <canvas id="gl-canvas" width="512" height="512"></canvas>
     </div>
 </body>
