@@ -125,26 +125,6 @@ window.onload = function init() {
         }
     });
 
-    canvas.addEventListener("mousedown", function (e) {
-        movement = true;
-        origX = e.clientX;
-        origY = e.clientY;
-        e.preventDefault();
-    });
-
-    canvas.addEventListener("mouseup", function (e) {
-        movement = false;
-    });
-
-    canvas.addEventListener("mousemove", function (e) {
-        if (movement) {
-            spinY = (spinY + (e.clientX - origX)) % 360;
-            spinX = (spinX + (origY - e.clientY)) % 360;
-            origX = e.clientX;
-            origY = e.clientY;
-        }
-    });
-
     initGameObjects();
     startFlyCycle();
     render();
