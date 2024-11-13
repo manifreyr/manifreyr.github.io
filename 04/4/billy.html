@@ -23,7 +23,12 @@ varying vec4 fColor;
 
 void main()
 {
-    gl_FragColor = fColor;
+    if(gl_FrontFacing){
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); 
+    }
+    else{ 
+        gl_FragColor = fColor;
+    }
 }
 </script>
 <style>
